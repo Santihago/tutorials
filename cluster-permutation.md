@@ -6,7 +6,7 @@ https://www.dropbox.com/s/t2hrjp9qwe5xrlx/time_statplot_group.m?dl=0
 
 # Choosing a statistical test
 
-This is the list of pre-built statistical functions for the cluster-based permutation test.
+This is the list of pre-built statistical functions for the cluster-based permutation test. The choice depends on the question to be answered.
 
 ```
 cfg.statistic       = 'indepsamplesT'           independent samples T-statistic,
@@ -18,13 +18,14 @@ cfg.statistic       = 'indepsamplesT'           independent samples T-statistic,
                       'depsamplesregrT'         dependent samples regression coefficient T-statistic,
                       'actvsblT'                activation versus baseline T-statistic.
 ```
-Obviously, the choice of the statistical test will affect how the data is prepared. 
 
 E.g.
 - One single participant performed multiple trials of two conditions. We will compare 30 trials congruent trials with 30 incongruent trials. We use an **independent samples t-test**.
 - 20 participants performed the same task. We first average trials by condition for each participant, and then use a **dependent samples t-test**.
 - 20 participants perform a perceptual task under 3 different conditions (visual, auditory or tactile). To evaluate the effect of the modality, we use a **dependent samples F-test.
 - 20 participants perform a psychological task with 4 difficulty levels. To evaluate the effect of incresing difficulty, we use a **dependent samples regression coefficient T-statistic**.
+
+Obviously, the choice of the statistical test will affect how the data is prepared. 
 
 # Preparing the data
 
