@@ -1,15 +1,32 @@
 Example script (skipping step 1 and 2), for multiple participants:
 https://www.dropbox.com/s/t2hrjp9qwe5xrlx/time_statplot_group.m?dl=0
 
-# Between-trials cluster-based permutation test
+# Understanding the cluster-based permutation test
 
-## 1. Selecting trials
+
+# Choosing a statistical test
+
+```Matlab
+cfg.statistic       = 'indepsamplesT'           independent samples T-statistic,
+                      'indepsamplesF'           independent samples F-statistic,
+                      'indepsamplesregrT'       independent samples regression coefficient T-statistic,
+                      'indepsamplesZcoh'        independent samples Z-statistic for coherence,
+                      'depsamplesT'             dependent samples T-statistic,
+                      'depsamplesFmultivariate' dependent samples F-statistic MANOVA,
+                      'depsamplesregrT'         dependent samples regression coefficient T-statistic,
+                      'actvsblT'                activation versus baseline T-statistic.
+```
+
+
+# Preparing the data
+
+## 1. Select trials
 
 We will first select the trials for our planned comparison. Since we plan to contrast two conditions, we select trials using the event codes corresponding to the two conditions. This step can be carried out both in EEGLAB and Fieldtrip.
 
 If the data is already epoched and in EEGLAB's format (`.set`), a fast way is to select trials directly on EEGLAB. Using EEGLAB’s visual interface, go to `‘Edit’ > ‘Select epochs or events’` and then manually selecting the events in the list.
 
-## 2. Convert the datafiles to Fieldtrip’s format. 
+## 2. Convert to Fieldtrip’s format. 
 
 EEGLAB data is visible in the variable workspace under the name ‘EEG’. This data structure contains all the EEG data for a single .set file. However, Fieldtrip data is structured differently than Eeglab data. Luckily there is a function that transforms data from one format to the other. Use the following code to convert one dataset:
 
@@ -19,10 +36,10 @@ data_all = eeglab2fieldtrip(EEG,'raw')
 
 If you click on the newly created ‘data_all’ and explore the data structure, you will observe that trial information is now located in the trialinfo subfield.
 
-## 3. Now we need to separate our data into two different data structures, one for each condition. This step is necessary for the permutation test. For this step, we will use a Fieldtrip's function to select the desired trials.
+## 3. Split data by condition
 
-Using Fieldtrip code:
-Check the data_all.trialinfo to see what your event codes are. If they are in text format, you can use e.g. strcmp(data_all.trialinfo.type, ‘SNTD’);. Here we have two event types, 72 and 73.
+For the permutation test, we need to separate our data into as many data structures as there are conditions. We will use a Fieldtrip's function `ft_redefinetrial` to select the desired trials. Of course, we need to know what the event values of interest are. If the data structure is in Fieldtrip's format, check  `data_all.trialinfo` to see what your event codes are for each trial. If your event codes are in text format (can happen when importing from EEGLAB), you can select those trials using text indexing (e.g. for an event coded as 'SNTD', use `strcmp(data_all.trialinfo.type, ‘SNTD’)`). Here, in this example we have two event types, 72 and 73, se we will create two data structures. If we had more conditions, we would create more.
+
 ```Matlab
 cfg = [];
 cfg.trials = data_all.trialinfo == 72;
@@ -33,18 +50,26 @@ cfg.trials = data_all.trialinfo == 73;
 data_B = ft_redefinetrial(cfg, data_all);
 ```
 
-This will create two data structures, data_A and data_B (containing the trials for each of the conditions).
+This code will create two data structures, data_A and data_B, containing the trials for each of the conditions.
+
+### Optional: equalizing the number of trials per condition
+
+Abc.
 
 ## 4. For each of the condition's data structures, we will now average across all trials using ft_timelockanalysis. We do not average across electrodes or time.
 
 Note: For analysis of a single participant, we want cfg.keeptrials = 'yes'. That is because we will compare multiple trials of one condition with the trials in another condition. For multiple participants, Fieldtrip can’t deal with both multiple trials per participant and multiple participants. So we will use averages per condition, akin to a Repeated Measures where whe average across trials per condition for each participant. In that case, we use cfg.keeptrials = 'no'. This will affect the structure of the resulting timelock data and how we define the Design Matrix later.
 Note 2: For a dependent samples t-test, the number of trials should match between conditions.
 
+```Matlab
 % We average all trials per condition 
 cfg = [];
 cfg.keeptrials = 'yes';
 timelock_A    = ft_timelockanalysis(cfg, data_A);
 timelock_B    = ft_timelockanalysis(cfg, data_B);
+```
+
+# Electrode layout
 
 ## 5. We will prepare an electrode layout to calculate clusters (a map indicating which electrodes are close to each other) , which will depend on our specific setup. 
 
@@ -64,7 +89,9 @@ cfg.feedback = 'no' ;
 neighbours = ft_prepare_neighbours(cfg, elec);
 ```
 
-## 6.  We create a design matrix. 
+# Design matrix
+
+## 6. We create a design matrix. 
 This step can be confusing at first. The Design Matrix will be different depending on whether we are doing a within-subjects or between-subjects comparison. Here is where we indicate whether we have multiple participants with multiple conditions each, or just one participant, or multiple participants who did different conditions, and so on. For instance, for two participants who completed two conditions, the matrix would be:
 1 2 1 2 : ivar
 1 1 2 2 : uvar
@@ -192,3 +219,12 @@ cfg: [1×1 struct]
 
 
 Clusters will be found in posclusters or negclusters. They will contain the cluster p-value (prob), the cluster statistic with its standard deviation and confidence interval.
+
+
+# Writing up the results
+
+
+# Resources
+
+**Design matrix**: https://www.fieldtriptoolbox.org/walkthrough/#input---data-and-your-designmatrix
+
