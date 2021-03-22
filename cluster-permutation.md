@@ -20,7 +20,11 @@ cfg.statistic       = 'indepsamplesT'           independent samples T-statistic,
 ```
 
 E.g.
-- One single participant performed multiple trials of two conditions. We will compare 30 trials congruent trials with 30 incongruent trials. We use an **independent samples t-test**.
+
+**Individual statistic**:
+- One single participant performed multiple trials of two conditions. We will compare 30 trials congruent trials with 30 incongruent trials. We use an **independent samples t-test**.  
+
+**Group statistic**:
 - 20 participants performed the same task. We first average trials by condition for each participant, and then use a **dependent samples t-test**.
 - 20 participants perform a perceptual task under 3 different conditions (visual, auditory or tactile). To evaluate the effect of the modality, we use a **dependent samples F-test**.
 - 20 participants perform a psychological task with 4 difficulty levels. To evaluate the effect of incresing difficulty, we use a **dependent samples regression coefficient T-statistic**.
